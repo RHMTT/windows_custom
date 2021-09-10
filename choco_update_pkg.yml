@@ -1,0 +1,12 @@
+---
+- name: Update all packages using Chocolatey
+  hosts: all
+  gather_facts: false
+  tasks:
+
+  - name: Update all installed packages
+    win_chocolatey:
+      name: all
+      state: latest
+    register: choco_update_output
+

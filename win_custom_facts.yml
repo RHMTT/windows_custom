@@ -1,0 +1,19 @@
+---
+- name: configure windows custom facts
+  hosts: all
+  tasks:
+  - name: "Create {{ facts_path }} directory"
+    win_file:
+      path: "{{ facts_path }}"
+      state: "directory"
+
+  - name: "Configure custom facts in remote"
+    win_copy:
+      src: "{{ item }}"
+      dest: "{{ facts_path }}"
+    with_fileglob: 'files/*.ps1'
+
+  - name: "Re-run setup to use custom facts"
+    setup:
+      fact_path: "{{ facts_path }}"
+

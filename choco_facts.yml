@@ -1,0 +1,12 @@
+---
+- name: Chocolatey Facts and Configuration
+  hosts: all
+  gather_facts: false
+  tasks:
+
+  - name: Gather facts from Chocolatey
+    win_chocolatey_facts:
+
+  - name: Displays the gathered facts
+    debug:
+      var: ansible_chocolatey

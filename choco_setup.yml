@@ -1,0 +1,36 @@
+---
+- name: Chocolatey Facts and Configuration
+  hosts: all
+  gather_facts: false
+  tasks:
+
+  - name: Gather facts from Chocolatey
+    win_chocolatey_facts:
+
+  - name: Displays the gathered facts
+    debug:
+      var: ansible_chocolatey
+
+  - name: Create a directory for the new Chocolatey caching directory
+    win_file:
+      path: C:\ChocoCache
+      state: directory
+
+  - name: Configure Chocolatey to use the new directory as the cache location
+    win_chocolatey_config:
+      name: cacheLocation
+      state: present
+      value: C:\ChocoCache
+
+  - name: Change the Execution Timeout Setting
+    win_chocolatey_config:
+      name: commandExecutionTimeoutSeconds
+      state: present
+      value: 3600
+
+  - name: ReGather facts from Chocolatey after new reconfiguring
+    win_chocolatey_facts:
+
+  - name: Displays the gathered facts
+    debug:
+      var: ansible_chocolatey.config
