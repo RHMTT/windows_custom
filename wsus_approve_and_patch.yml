@@ -1,0 +1,40 @@
+---
+- name: approve wsus alerts
+  hosts: wsus.example.com
+  gather_facts: false
+  tasks:
+    - name: approve wsus alerts
+      win_shell: |
+       Get-WsusUpdate -Classification All -Approval Unapproved -Status Any | Approve-WsusUpdate -Action Install -TargetGroupName "All Computers"
+       Get-WsusUpdate -Classification Security -Approval Unapproved -Status Any | Approve-WsusUpdate -Action Install -TargetGroupName "All Computers"
+       Get-WsusUpdate -Classification Critical -Approval Unapproved -Status Any | Approve-WsusUpdate -Action Install -TargetGroupName "All Computers"
+       Get-WsusUpdate -Classification WSUS -Approval Unapproved -Status Any | Approve-WsusUpdate -Action Install -TargetGroupName "All Computers"
+
+- name: update hosts
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Search and download Windows updates without installing
+      win_updates:
+        state: downloaded
+        
+    - name: Install all updates without a schedule tasks
+      win_updates:
+        server_selection: managed_server
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+          - UpdateRollups
+        accept_list: "{{ win_patch_accept_list | default (omit) }}"
+        reject_list: "{{ win_patch_reject_list | default (omit) }}" 
+        log_path: E:\Win_Template_Patch.log
+      register: patch_output
+
+    - name: Reboot if needed
+      win_reboot:
+        reboot_timeout: 600
+        msg: "Reboot initiated by Ansible"
+        pre_reboot_delay: 2
+        post_reboot_delay: 30
+        test_command: 'exit (Get-Service -Name Netlogon).Status -ne "Running"'
+      when: patch_output.reboot_required
