@@ -10,13 +10,4 @@
       version: "{{ item.version }}"
     loop: "{{ choco_packages }}"
 
-  - name: Check python version
-    win_command: python --version
-    register: check_python_version
-    ignore_errors: true
-
-  - name: Check nodejs version
-    win_command: node --version
-    register: check_node_version
-    ignore_errors: true
 
